@@ -1,8 +1,6 @@
 package main
 
 import (
-	"bufio"
-	"bytes"
 	"io"
 	"os"
 	"strings"
@@ -36,5 +34,27 @@ func Test_isPrime(t *testing.T) {
 		if e.msg != msg {
 			t.Errorf("%s: expected %s but got %s", e.name, e.msg, msg)
 		}
+	}
+}
+
+func Test_prompt(t *testing.T) {
+	old := os.Stdout
+
+	r, w, _ := os.Pipe()
+
+	os.Stdout = w
+	prompt()
+	w.Close()
+
+	os.Stdout = old
+
+	out, _ := io.ReadAll(r)
+	r.Close()
+
+	expected := "-> "
+	ok := strings.EqualFold(string(out), expected)
+
+	if !ok {
+		t.Errorf("Expected \"%s\", got \"%s\"", expected, out)
 	}
 }
