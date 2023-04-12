@@ -51,6 +51,7 @@ func getStdout(f func()) string {
 
 	bytes, _ := io.ReadAll(r)
 	r.Close()
+
 	out := string(bytes)
 
 	return out
@@ -61,8 +62,7 @@ func Test_prompt(t *testing.T) {
 
 	expected := "-> "
 
-	ok := strings.EqualFold(out, expected)
-	if !ok {
+	if !strings.EqualFold(out, expected) {
 		t.Errorf("Expected \"%s\", got \"%s\"", expected, out)
 	}
 }
@@ -77,8 +77,7 @@ func Test_intro(t *testing.T) {
 	sb.WriteString("-> ")
 	expected := sb.String()
 
-	ok := strings.EqualFold(out, expected)
-	if !ok {
+	if !strings.EqualFold(out, expected) {
 		t.Errorf("Expected \"%s\", got \"%s\"", expected, out)
 	}
 }
@@ -106,5 +105,17 @@ func Test_checkNumbers(t *testing.T) {
 		if e.expectedDone != done {
 			t.Errorf("done: Expected %v, got %v", e.expectedDone, done)
 		}
+	}
+}
+
+func Test_readUserInput(t *testing.T) {
+	doneChan := make(chan bool)
+
+	go readUserInput(strings.NewReader("q"), doneChan)
+
+	done := <-doneChan
+
+	if !done {
+		t.Errorf("doneChan: Expected true, got %v", done)
 	}
 }
