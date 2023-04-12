@@ -37,23 +37,46 @@ func Test_isPrime(t *testing.T) {
 	}
 }
 
-func Test_prompt(t *testing.T) {
+func getStdout(f func()) string {
 	old := os.Stdout
 
 	r, w, _ := os.Pipe()
 
 	os.Stdout = w
-	prompt()
+	f()
 	w.Close()
 
 	os.Stdout = old
 
-	out, _ := io.ReadAll(r)
+	bytes, _ := io.ReadAll(r)
 	r.Close()
+	out := string(bytes)
+
+	return out
+}
+
+func Test_prompt(t *testing.T) {
+	out := getStdout(prompt)
 
 	expected := "-> "
-	ok := strings.EqualFold(string(out), expected)
 
+	ok := strings.EqualFold(out, expected)
+	if !ok {
+		t.Errorf("Expected \"%s\", got \"%s\"", expected, out)
+	}
+}
+
+func Test_intro(t *testing.T) {
+	out := getStdout(intro)
+
+	var sb strings.Builder
+	sb.WriteString("Is it Prime?\n")
+	sb.WriteString("------------\n")
+	sb.WriteString("Enter a whole number, and we'll tell you if it is a prime number or not. Enter q to quit.\n")
+	sb.WriteString("-> ")
+	expected := sb.String()
+
+	ok := strings.EqualFold(out, expected)
 	if !ok {
 		t.Errorf("Expected \"%s\", got \"%s\"", expected, out)
 	}
